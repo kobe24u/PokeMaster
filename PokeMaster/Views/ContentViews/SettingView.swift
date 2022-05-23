@@ -31,28 +31,35 @@ struct SettingView: View {
 extension SettingView {
   var accountSection: some View {
     Section(header: Text("Account")) {
-      Picker(
-        selection: settingsBinding.accountBehavior,
-        label: Text("")
-      ) {
-        ForEach(
-          AppState.Settings.AccountBehavior.allCases,
-          id: \.self
+      if settings.loginUser == nil {
+        Picker(
+          selection: settingsBinding.accountBehavior,
+          label: Text("")
         ) {
-          Text($0.text)
+          ForEach(
+            AppState.Settings.AccountBehavior.allCases,
+            id: \.self
+          ) {
+            Text($0.text)
+          }
         }
-      }
-      .pickerStyle(.segmented)
-      
-      TextField("Email: ", text: settingsBinding.email)
-      SecureField("Password: ", text: settingsBinding.password)
-      
-      if settings.accountBehavior == .register {
-        SecureField("Verify Password", text: settingsBinding.verifyPassword)
-      }
-      
-      Button(settings.accountBehavior.text) {
-        print("Signin/register")
+        .pickerStyle(.segmented)
+        
+        TextField("Email: ", text: settingsBinding.email)
+        SecureField("Password: ", text: settingsBinding.password)
+        
+        if settings.accountBehavior == .register {
+          SecureField("Verify Password", text: settingsBinding.verifyPassword)
+        }
+        
+        Button(settings.accountBehavior.text) {
+          self.store.dispatch(.login(email: self.settings.email, password: self.settings.password))
+        }
+      } else {
+        Text(settings.loginUser?.email ?? "")
+        Button("Logout") {
+          print("Logout")
+        }
       }
     }
   }

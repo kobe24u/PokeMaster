@@ -33,6 +33,8 @@ extension AppState {
     var email = ""
     var password = ""
     var verifyPassword = ""
+    
+    var loginUser: User?
   }
 }
 
