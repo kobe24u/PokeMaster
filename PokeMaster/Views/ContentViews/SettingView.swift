@@ -24,6 +24,9 @@ struct SettingView: View {
       optionSection
       actionSection
     }
+    .alert(item: settingsBinding.loginError) { error in
+      Alert(title: Text(error.localizedDescription))
+    }
   }
 }
 
@@ -52,8 +55,14 @@ extension SettingView {
           SecureField("Verify Password", text: settingsBinding.verifyPassword)
         }
         
-        Button(settings.accountBehavior.text) {
-          self.store.dispatch(.login(email: self.settings.email, password: self.settings.password))
+        if settings.isLoading {
+          ProgressView()
+        } else {
+          Button(settings.accountBehavior.text) {
+            self.store.dispatch(
+              action: .login(email: self.settings.email, password: self.settings.password)
+            )
+          }
         }
       } else {
         Text(settings.loginUser?.email ?? "")

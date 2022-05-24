@@ -8,29 +8,42 @@
 
 import Combine
 
-class Store: ObservableObject {
+class Store: MVIType {
   @Published var appState = AppState()
+  var cancellables = Set<AnyCancellable>()
   
-  static func reduce(
-    state: AppState,
-    action: AppAction
-  ) -> AppState {
-    var appState = state
-    
+  func reduce(currentState: AppState, action: AppAction) -> AppState {
+    var newState = currentState
+    switch action {
+    case .login(_, _):
+      newState.settings.isLoading = true
+    }
+    return newState
+  }
+  
+  
+  func runSideEffect(action: AppAction, currentState: AppState) {
     switch action {
     case .login(let email, let password):
-      if password == "password" {
-        let user: User = .init(email: email, favoritePokemonIDs: [])
-        appState.settings.loginUser = user
-      }
+      loginAction(email, password)
     }
-    
-    return appState
   }
   
-  func dispatch(_ action: AppAction) {
-    let newState = Store.reduce(state: appState, action: action)
-    appState = newState
+  fileprivate func loginAction(_ email: String, _ password: String) {
+    LoginRequest(email: email, password: password)
+      .publisher
+      .sink { [weak self] completion in
+        self?.appState.settings.isLoading = false
+        switch completion {
+        case .finished: break
+        case .failure(let error):
+          self?.appState.settings.loginError = error
+        }
+      } receiveValue: { [weak self] user in
+        self?.appState.settings.loginUser = user
+      }
+      .store(in: &cancellables)
   }
 }
+
 

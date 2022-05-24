@@ -35,6 +35,9 @@ extension AppState {
     var verifyPassword = ""
     
     var loginUser: User?
+    
+    var isLoading: Bool = false
+    var loginError: AppError?
   }
 }
 
